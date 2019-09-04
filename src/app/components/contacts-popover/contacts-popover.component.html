@@ -1,0 +1,18 @@
+<ion-list no-padding>
+  <ion-item button *ngFor="let contact of contacts" lines="none" (click)="goToUserChat(contact)">
+    <div class="borderBottomLine"></div>
+    <div class="listSection">
+      <div class="UserimgSection">
+        <ion-avatar class="chatImage" slot="start">
+          <ion-img [src]="contact.imageurl">
+          </ion-img>
+        </ion-avatar>
+      </div>
+      <div class="usernameSection" padding-start padding>
+        <h5>
+          {{contact.firstname}}{{ contact.lastname}}
+        </h5>
+      </div>
+    </div>
+  </ion-item>
+</ion-list>

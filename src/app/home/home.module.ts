@@ -5,10 +5,13 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { HomePage } from './home.page';
+import { ComponentModule } from '../components/component.module';
+import { ChatService } from '../service/chat.service';
 
 @NgModule({
   imports: [
     CommonModule,
+    ComponentModule,
     FormsModule,
     IonicModule,
     RouterModule.forChild([
@@ -18,6 +21,7 @@ import { HomePage } from './home.page';
       }
     ])
   ],
+  providers: [ChatService],
   declarations: [HomePage]
 })
-export class HomePageModule {}
+export class HomePageModule { }
