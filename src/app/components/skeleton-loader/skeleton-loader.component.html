@@ -1,0 +1,38 @@
+<ion-list *ngIf="IsConversations else oneToOneChatContent">
+  <ion-item *ngFor="let text of skeltonList">
+    <ion-avatar slot="start">
+      <ion-skeleton-text animated></ion-skeleton-text>
+    </ion-avatar>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="9">
+          <ion-skeleton-text animated style="width: 30%"></ion-skeleton-text>
+        </ion-col>
+        <ion-col>
+          <ion-skeleton-text animated style="width: 100%"></ion-skeleton-text>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-skeleton-text animated style="width: 75%"></ion-skeleton-text>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-item>
+</ion-list>
+<ng-template #oneToOneChatContent>
+  <ion-list *ngIf="IsConversations else oneToOneChatContent">
+    <ion-item *ngFor="let text of skeltonList">
+      <ion-avatar slot="start">
+        <ion-skeleton-text animated></ion-skeleton-text>
+      </ion-avatar>
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <ion-skeleton-text animated style="width: 30%"></ion-skeleton-text>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+  </ion-list>
+</ng-template>

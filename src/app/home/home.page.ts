@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import * as firebase from 'firebase';
 import { Conversation } from '../model/conversation';
 import * as moment from 'moment';
@@ -7,14 +7,14 @@ import { ContactsPopoverComponent } from '../components/contacts-popover/contact
 import { NavigationExtras, Router } from '@angular/router';
 import { Contact } from '../model/contact';
 import { ChatService } from '../service/chat.service';
-import { Observable, of, from, observable } from 'rxjs';
-import { flatMap, switchMap, map } from 'rxjs/operators';
+import { ContactsService } from '../service/contacts.service';
 
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class HomePage {
 
@@ -28,26 +28,32 @@ export class HomePage {
   constructor(
     public popoverController: PopoverController,
     public chatService: ChatService,
+    public contactService: ContactsService,
     public router: Router) {
 
-    this.currentUser = this.chatService.getCurrentUser();
-    this.ref = firebase.database().ref('conversations/' + this.currentUser.uid);
-    this.ref.on('value', conversations => {
-      this.conversations = [];
-      conversations.forEach(data => {
-        this.conversations.push({
-          key: data.key,
-          channelType: data.val().channelType,
-          isNew: data.val().isNew,
-          lastMessageText: data.val().lastMessageText,
-          recipient: data.val().recipient,
-          recipient_fullname: data.val().recipient_fullname,
-          sender: data.val().sender,
-          sender_fullname: data.val().sender_fullname,
-          timestamp: data.val().timestamp
-        })
+    this.contactService.getCurrentUser().then((currentUser) => {
+      this.currentUser = currentUser;
+      this.ref = firebase.database().ref('conversations/' + this.currentUser.uid);
+      this.ref.on('value', conversations => {
+        this.conversations = [];
+        conversations.forEach(data => {
+          this.conversations.push({
+            key: data.key,
+            channelType: data.val().channelType,
+            isNew: data.val().isNew,
+            lastMessageText: data.val().lastMessageText,
+            recipient: data.val().recipient,
+            recipient_fullname: data.val().recipient_fullname,
+            sender: data.val().sender,
+            sender_fullname: data.val().sender_fullname,
+            timestamp: data.val().timestamp
+          })
+        });
+        this.conversations.sort((c1, c2) => c2.timestamp - c1.timestamp);
+        console.log(this.conversations);
       });
-      console.log(this.conversations);
+    }, (error) => {
+
     });
   }
 
@@ -119,6 +125,14 @@ export class HomePage {
       return conversation.recipient_fullname;
     } else {
       return conversation.sender_fullname;
+    }
+  }
+
+  public getContactByUID(conversation: Conversation) {
+    if (this.currentUser.uid === conversation.sender) {
+      return this.contactService.getContactByUid(conversation.recipient);
+    } else {
+      return this.contactService.getContactByUid(conversation.sender);
     }
   }
 }

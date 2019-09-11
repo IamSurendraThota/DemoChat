@@ -1,13 +1,13 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Conversation } from '../model/conversation';
 import * as firebase from 'firebase';
 import { Message, MessageType } from '../model/message';
 import { Contact } from '../model/contact';
-import { ChatService } from '../service/chat.service';
 import { IonContent, PopoverController } from '@ionic/angular';
 import { AttachmentPopoverComponent } from '../components/attachment-popover/attachment-popover.component';
 import { File } from '@ionic-native/file/ngx';
+import { ContactsService } from '../service/contacts.service';
 
 export interface sendAttachments {
   id: number;
@@ -20,6 +20,7 @@ export interface sendAttachments {
   selector: 'app-one-to-one-chat',
   templateUrl: './one-to-one-chat.page.html',
   styleUrls: ['./one-to-one-chat.page.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class OneToOneChatPage implements OnInit {
 
@@ -37,47 +38,58 @@ export class OneToOneChatPage implements OnInit {
   public input: string;
 
   public messagesLength: number;
-  //remove harcode
+
   private currentUser: Contact;
+
+  public isLoading: boolean = false;
   phone_model = 'iPhone';
 
   constructor(
-    public chatService: ChatService,
+    public contactsService: ContactsService,
+    public contactService: ContactsService,
     public popoverController: PopoverController,
     private file: File,
     private router: Router) {
-    this.currentUser = this.chatService.getCurrentUser();
+    this.isLoading = true;
     if (this.router.getCurrentNavigation().extras.state) {
       this.convsersation = this.router.getCurrentNavigation().extras.state.selectedConversation;
       this.selectedUser = this.router.getCurrentNavigation().extras.state.selectedContact;
-      if (this.convsersation) {
-        this.messagesRef = firebase.database().ref('messages/' + this.convsersation.key);
+      this.contactsService.getCurrentUser().then((currentUser) => {
+        this.currentUser = currentUser;
+        if (this.convsersation) {
+          this.messagesRef = firebase.database().ref('messages/' + this.convsersation.key);
 
-        this.messagesRef.on('value', msgs => {
-          this.messagesLength = msgs.numChildren();
-        });
-
-        this.messagesRef.orderByChild('timestamp').limitToLast(this.limit).on('value', messages => {
-          let messagesList = [];
-          messages.forEach(message => {
-            messagesList.push({
-              key: message.key,
-              channel_type: message.val().channel_type,
-              recipient: message.val().recipient,
-              recipient_fullname: message.val().recipient_fullname,
-              sender: message.val().sender,
-              sender_fullname: message.val().sender_fullname,
-              status: message.val().status,
-              content: message.val().content,
-              timestamp: message.val().timestamp,
-              type: message.val().type
-            })
+          this.messagesRef.on('value', msgs => {
+            this.messagesLength = msgs.numChildren();
           });
-          this.messagesList = messagesList;
-          setTimeout(() => { this.content.scrollToBottom(); }, 200);
-          console.log(this.messagesList);
-        });
-      }
+
+          this.messagesRef.orderByChild('timestamp').limitToLast(this.limit).on('value', messages => {
+            let messagesList = [];
+            messages.forEach(message => {
+              messagesList.push({
+                key: message.key,
+                channel_type: message.val().channel_type,
+                recipient: message.val().recipient,
+                recipient_fullname: message.val().recipient_fullname,
+                sender: message.val().sender,
+                sender_fullname: message.val().sender_fullname,
+                status: message.val().status,
+                content: message.val().content,
+                timestamp: message.val().timestamp,
+                type: message.val().type
+              })
+            });
+            this.messagesList = messagesList;
+            setTimeout(() => { this.content.scrollToBottom(); }, 200);
+            this.isLoading = false;
+            console.log(this.messagesList);
+          });
+        } else {
+          this.isLoading = false;
+        }
+      }, (error) => {
+
+      });
     }
   }
 
@@ -217,6 +229,10 @@ export class OneToOneChatPage implements OnInit {
     return await popover.present();
   }
 
+  public getContactByUID(message: Message) {
+    return this.contactService.getContactByUid(message.sender).imageurl;
+  }
+
   private uploadToFirebase(_imageBlobInfo): Promise<firebase.storage.UploadTaskSnapshot> {
     console.log("uploadToFirebase");
     let newAttachement: sendAttachments = {
@@ -252,11 +268,11 @@ export class OneToOneChatPage implements OnInit {
     });
   }
 
+
   // FILE STUFF
   private makeFileIntoBlob(_imagePath): Promise<any> {
 
     return new Promise((resolve, reject) => {
-      debugger;
       let fileName = "";
       this.file
         .resolveLocalFilesystemUrl(_imagePath)

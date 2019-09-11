@@ -4,39 +4,46 @@
       <ion-menu-button color="dark"></ion-menu-button>
     </ion-buttons>
     <ion-title>Chats</ion-title>
-    <ion-buttons slot="end" padding-start (click)="openContacts($event)">
-      <ion-icon name="add" class="fontSize"></ion-icon>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-list no-padding>
-    <ion-item button *ngFor="let chat of conversations" (click)="goToConversation(chat)" lines="none">
-      <div class="borderBottomLine"></div>
-      <div class="listSection">
-        <div class="UserimgSection">
-          <ion-avatar class="chatImage" slot="start">
-            <img src="../../assets/images/sg2.jpg" />
-            <!-- <span class="onlineOffline_icon"
-              [ngStyle]="{'background-color':(chat.status === 'online'? '#4cd137' : '#c23616')}"></span> -->
-          </ion-avatar>
-        </div>
-        <div class="usernameSection" padding-start padding>
-          <h5>
-            <ion-icon *ngIf="chat.group" name="people" color="medium"></ion-icon>
-            <ion-icon name="microphone" *ngIf="chat.broadcast" color="medium"></ion-icon>
-            {{getUserNameByConversation(chat)}}
-          </h5>
-          <p class="descText" no-margin no-padding>{{chat.lastMessageText}}</p>
-        </div>
-      </div>
-      <div slot="end" class="lastSection">
-        <ion-note *ngIf="chat.badge || !chat.timestamp" class="sendTime">{{chat.timestamp}}</ion-note>
-        <ion-badge slot="end" class="userBadge" *ngIf="chat.badge">{{chat.badge}}</ion-badge>
-        <ion-note slot="end" *ngIf="chat.timestamp">{{chat.timestamp | moment}}</ion-note>
-      </div>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="success" (click)="openContacts($event)">
+      <ion-icon name="contacts" class="fontSize"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
-    </ion-item>
-  </ion-list>
+  <app-skeleton-loader *ngIf="conversations.length===0; else conversationContent">
+  </app-skeleton-loader>
+  <ng-template #conversationContent>
+    <ion-list no-padding>
+      <ion-item button *ngFor="let chat of conversations" (click)="goToConversation(chat)" lines="none">
+        <div class="borderBottomLine"></div>
+        <div class="listSection">
+          <div class="UserimgSection">
+            <ion-avatar class="chatImage" slot="start">
+              <img-loader [src]="getContactByUID(chat)?.imageurl" class="profile-Pic" useImg></img-loader>
+              <!-- <span class="onlineOffline_icon"
+              [ngStyle]="{'background-color':(chat.status === 'online'? '#4cd137' : '#c23616')}"></span> -->
+            </ion-avatar>
+          </div>
+          <div class="usernameSection" padding-start padding>
+            <h5>
+              <ion-icon *ngIf="chat.group" name="people" color="medium"></ion-icon>
+              <ion-icon name="microphone" *ngIf="chat.broadcast" color="medium"></ion-icon>
+              {{getUserNameByConversation(chat)}}
+            </h5>
+            <p class="descText" no-margin no-padding>{{chat.lastMessageText}}</p>
+          </div>
+        </div>
+        <div slot="end" class="lastSection">
+          <ion-note *ngIf="chat.badge || !chat.timestamp" class="sendTime">{{chat.timestamp}}</ion-note>
+          <ion-badge slot="end" class="userBadge" *ngIf="chat.badge">{{chat.badge}}</ion-badge>
+          <ion-note slot="end" *ngIf="chat.timestamp">{{chat.timestamp | moment}}</ion-note>
+        </div>
+
+      </ion-item>
+    </ion-list>
+  </ng-template>
 </ion-content>

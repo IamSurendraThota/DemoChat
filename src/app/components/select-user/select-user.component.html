@@ -1,8 +1,7 @@
-<div style="text-align: center;padding: 8px;border-bottom: gray 1px solid">
-  <span style="font-weight: bold">Select Contact</span>
-  <div>{{contacts.length}} contacts</div>
-</div>
-<ion-list>
+<ion-list no-padding *ngIf="contacts.length!==0">
+  <ion-list-header>
+    <ion-label>Select a User for auto login</ion-label>
+  </ion-list-header>
   <ion-item button *ngFor="let contact of contacts" lines="none" (click)="goToUserChat(contact)">
     <div class="borderBottomLine"></div>
     <div class="listSection">

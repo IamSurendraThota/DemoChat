@@ -9,18 +9,23 @@ import { AttachmentPopoverComponent } from './attachment-popover/attachment-popo
 import { Camera } from '@ionic-native/camera/ngx';
 import { WebView } from '@ionic-native/ionic-webview/ngx';
 import { FilePath } from '@ionic-native/file-path/ngx';
+import { SkeletonLoaderComponent } from './skeleton-loader/skeleton-loader.component';
+import { IonicImageLoader } from 'ionic-image-loader';
+import { ContactsService } from '../service/contacts.service';
+import { SelectUserComponent } from './select-user/select-user.component';
 
 
 
 @NgModule({
-  declarations: [ContactsPopoverComponent, MomentPipe, AttachmentPopoverComponent],
+  declarations: [ContactsPopoverComponent, SelectUserComponent, MomentPipe, AttachmentPopoverComponent, SkeletonLoaderComponent],
   imports: [
     CommonModule,
-    IonicModule
+    IonicModule,
+    IonicImageLoader
   ],
-  providers: [ChatService, Camera, WebView, FilePath],
-  exports: [MomentPipe],
-  entryComponents: [ContactsPopoverComponent, AttachmentPopoverComponent]
+  providers: [ChatService, Camera, WebView, FilePath, ContactsService],
+  exports: [MomentPipe, SkeletonLoaderComponent],
+  entryComponents: [ContactsPopoverComponent, AttachmentPopoverComponent, SelectUserComponent]
 })
 export class ComponentModule {
 

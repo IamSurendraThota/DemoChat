@@ -9,6 +9,7 @@ import { OneToOneChatPage } from './one-to-one-chat.page';
 import { ComponentModule } from '../components/component.module';
 import { File } from '@ionic-native/file/ngx';
 import { NgCircleProgressModule } from 'ng-circle-progress';
+import { IonicImageLoader } from 'ionic-image-loader';
 
 const routes: Routes = [
   {
@@ -22,7 +23,7 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     ComponentModule,
-    ComponentModule,
+    IonicImageLoader,
     IonicModule,
         NgCircleProgressModule.forRoot({
           radius: 100,

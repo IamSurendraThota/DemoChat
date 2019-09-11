@@ -7,12 +7,14 @@ import { RouterModule } from '@angular/router';
 import { HomePage } from './home.page';
 import { ComponentModule } from '../components/component.module';
 import { ChatService } from '../service/chat.service';
+import { IonicImageLoader } from 'ionic-image-loader';
 
 @NgModule({
   imports: [
     CommonModule,
     ComponentModule,
     FormsModule,
+    IonicImageLoader,
     IonicModule,
     RouterModule.forChild([
       {

@@ -13,59 +13,65 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content #content padding-vertical fullscreen [scrollEvents]="true" #ionContent>
-  <div id="chat-parent" class="bg-image" [ngClass]="{ 'bg-image-X': phone_model=='iPhone X'}">
-    <div id="chat-container">
-      <ion-infinite-scroll position="top" threshold="100px" (ionInfinite)="loadData($event)">
-        <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
-        </ion-infinite-scroll-content>
-      </ion-infinite-scroll>
-      <ion-row *ngFor="let conv of messagesList; let i = index;" class="full no-padding">
-        <ion-col class="no-padding chat-row" [ngClass]="{ 'reverse': isSender(conv.sender)}">
-          <div class="avatar-parent">
-            <div class="avatar-border"></div>
-            <img src="../../assets/images/sg1.jpg" class="avatar" *ngIf="isSender(conv.sender)">
-            <img src="../../assets/images/sg2.jpg" class="avatar" *ngIf="!isSender(conv.sender)">
-          </div>
-          <div
-            [ngClass]="{ 'name-row-parent-right': isSender(conv.sender),'name-row-parent-left': !isSender(conv.sender)}">
-            <div class="no-padding"
-              [ngClass]="{ 'name-row-right': isSender(conv.sender),'name-row-left': !isSender(conv.sender)}">
-              <!-- {{isSender(conv.sender) ? 'Martha': 'Shawn'}} -->
-              <div [ngClass]="{ 'timer-right': isSender(conv.sender),'timer-left': !isSender(conv.sender)}">
-                {{conv.timestamp | moment}}
-                <!-- <ion-icon *ngIf="isSender(conv.sender) && conv.sent" name="checkmark" [color]="conv.read ? 'd3green': 'light'"
+<ion-content #content [scrollEvents]="true" #ionContent>
+  <app-skeleton-loader *ngIf="isLoading; else chatContent" IsConversations="false"></app-skeleton-loader>
+  <ng-template #chatContent>
+    <div id="chat-parent" class="bg-image" [ngClass]="{ 'bg-image-X': phone_model=='iPhone X'}">
+      <div id="chat-container">
+        <ion-infinite-scroll position="top" threshold="100px" (ionInfinite)="loadData($event)">
+          <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more data...">
+          </ion-infinite-scroll-content>
+        </ion-infinite-scroll>
+        <ion-row *ngFor="let conv of messagesList; let i = index;" class="full no-padding">
+          <ion-col class="no-padding chat-row" [ngClass]="{ 'reverse': isSender(conv.sender)}">
+            <div class="avatar-parent">
+              <div class="avatar-border"></div>
+              <img-loader [src]="getContactByUID(conv)" useImg class="avatar"></img-loader>
+              <!-- <img [src]="getContactByUID(conv)?.imageurl" class="avatar"> -->
+              <!-- <img src="../../assets/images/sg2.jpg" class="avatar" *ngIf="!isSender(conv.sender)"> -->
+            </div>
+            <div
+              [ngClass]="{ 'name-row-parent-right': isSender(conv.sender),'name-row-parent-left': !isSender(conv.sender)}">
+              <div class="no-padding"
+                [ngClass]="{ 'name-row-right': isSender(conv.sender),'name-row-left': !isSender(conv.sender)}">
+                <!-- {{isSender(conv.sender) ? 'Martha': 'Shawn'}} -->
+                <div [ngClass]="{ 'timer-right': isSender(conv.sender),'timer-left': !isSender(conv.sender)}">
+                  {{conv.timestamp | moment}}
+                  <!-- <ion-icon *ngIf="isSender(conv.sender) && conv.sent" name="checkmark" [color]="conv.read ? 'd3green': 'light'"
                   class="first-tick"></ion-icon>
                 <ion-icon *ngIf="isSender(conv.sender) && conv.delivered" name="checkmark"
                   [color]="conv.read ? 'd3green': 'light'" class="second-tick"></ion-icon> -->
-              </div>
-              <div [ngClass]="{ 'reverse-arc-right': isSender(conv.sender),'reverse-arc-left': !isSender(conv.sender)}">
+                </div>
                 <div
-                  [ngClass]="{ 'reverse-arc-color-right': isSender(conv.sender),'reverse-arc-color-left': !isSender(conv.sender)}">
+                  [ngClass]="{ 'reverse-arc-right': isSender(conv.sender),'reverse-arc-left': !isSender(conv.sender)}">
+                  <div
+                    [ngClass]="{ 'reverse-arc-color-right': isSender(conv.sender),'reverse-arc-color-left': !isSender(conv.sender)}">
+                  </div>
                 </div>
               </div>
+              <div class="no-padding"
+                [ngClass]="{ 'message-row-right': isSender(conv.sender),'message-row-left': !isSender(conv.sender)}">
+                <ion-text no-margin class="text" *ngIf="conv.type==='text'">{{conv.content}}</ion-text>
+                <img-loader *ngIf="conv.type==='image'" [src]="conv.content" useImg></img-loader>
+                <!-- <ion-img *ngIf="conv.type==='image'" [src]="conv.content"></ion-img> -->
+              </div>
             </div>
-            <div class="no-padding"
-              [ngClass]="{ 'message-row-right': isSender(conv.sender),'message-row-left': !isSender(conv.sender)}">
-              <ion-text no-margin class="text" *ngIf="conv.type==='text'">{{conv.content}}</ion-text>
-              <ion-img *ngIf="conv.type==='image'" [src]="conv.content"></ion-img>
-            </div>
-          </div>
 
-        </ion-col>
-      </ion-row>
-      <ion-row class="full no-padding" *ngFor="let attachment of sendAttachments; let i = index;">
-        <ion-col class="no-padding chat-row">
-          <div class="attachment-row-left no-padding">
-            <circle-progress [percent]="attachment.loadPercentage" [radius]="100" [outerStrokeWidth]="16"
-              [innerStrokeWidth]="8" [outerStrokeColor]="'#78C000'" [innerStrokeColor]="'#C7E596'" [animation]="true"
-              subtitleColor="black" [subtitle]="attachment.subTitle">
-            </circle-progress>
-          </div>
-        </ion-col>
-      </ion-row>
+          </ion-col>
+        </ion-row>
+        <ion-row class="full no-padding" *ngFor="let attachment of sendAttachments; let i = index;">
+          <ion-col class="no-padding chat-row">
+            <div class="attachment-row-left no-padding">
+              <circle-progress [percent]="attachment.loadPercentage" [radius]="100" [outerStrokeWidth]="16"
+                [innerStrokeWidth]="8" [outerStrokeColor]="'#78C000'" [innerStrokeColor]="'#C7E596'" [animation]="true"
+                subtitleColor="black" [subtitle]="attachment.subTitle">
+              </circle-progress>
+            </div>
+          </ion-col>
+        </ion-row>
+      </div>
     </div>
-  </div>
+  </ng-template>
 </ion-content>
 <ion-footer translucent [ngClass]="{ 'custom-footer': phone_model=='iPhone X'}">
   <ion-row class="input-position" [ngClass]="{ 'custom-footer-row': phone_model=='iPhone X'}">

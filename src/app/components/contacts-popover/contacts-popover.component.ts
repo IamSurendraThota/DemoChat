@@ -1,17 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Contact } from 'src/app/model/contact';
 import * as firebase from 'firebase';
 import { PopoverController } from '@ionic/angular';
 import * as moment from 'moment';
 import { Conversation } from 'src/app/model/conversation';
 import { NavigationExtras, Router } from '@angular/router';
-import { ChatService } from 'src/app/service/chat.service';
+import { ContactsService } from 'src/app/service/contacts.service';
 
 
 @Component({
   selector: 'app-contacts-popover',
   templateUrl: './contacts-popover.component.html',
   styleUrls: ['./contacts-popover.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ContactsPopoverComponent implements OnInit {
 
@@ -25,16 +26,14 @@ export class ContactsPopoverComponent implements OnInit {
   public contactsRef = firebase.database().ref('contacts/');
 
   constructor(
-    public chatService: ChatService,
+    public contactsService: ContactsService,
     public popoverController: PopoverController,
     public router: Router) {
 
-    this.currentUser = this.chatService.getCurrentUser();
-    this.conversationRef = firebase.database().ref('conversations/' + this.currentUser.uid);
-
-    this.contactsRef.on('value', contacts => {
+    this.contactsRef.once('value', contacts => {
+      let contactsList = [];
       contacts.forEach(data => {
-        this.contacts.push({
+        contactsList.push({
           email: data.val().email,
           firstname: data.val().firstname,
           imageurl: data.val().imageurl,
@@ -42,6 +41,12 @@ export class ContactsPopoverComponent implements OnInit {
           uid: data.val().uid,
           timestamp: data.val().timestamp
         })
+      });
+      this.contactsService.getCurrentUser().then((currentUser) => {
+        this.currentUser = currentUser;
+        this.conversationRef = firebase.database().ref('conversations/' + this.currentUser.uid);
+
+        this.contacts = contactsList.filter(contact => contact.uid !== this.currentUser.uid);
       });
       console.log(this.contacts);
     });
